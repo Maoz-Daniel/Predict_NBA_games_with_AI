@@ -1,27 +1,13 @@
-Step 1: Clone the Repository
-    1. Open a terminal or command prompt.
-    2. Clone the repository:
-        git clone <repository-url>
-    3. Navigate to the project directory:
-
-Step 2: Create a Virtual Environment
-    1. Create a .venv folder:
-        python -m venv .venv
-    2. Activate the virtual environment:
+Step 1: Activate a Virtual Environment
+    1. Activate the virtual environment:
         .\.venv\Scripts\activate
 
-Step 3: Install Dependencies
-    1. Install required libraries using requirements.txt:
-        pip install -r requirements.txt
-
-Step 4: Update Dependencies (if needed)
-    1. If you install new libraries, update requirements.txt:
+Step 2: Before Push
+    1. Update requirements.txt
         pip freeze > requirements.txt
 
-
-
-
-
-
-
-
+Step 3: After Pull
+    1. Activate the Virtual Environment:
+        .\.venv\Scripts\activate
+    2. Install Dependencies:
+        pip install -r requirements.txt
