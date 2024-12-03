@@ -18,7 +18,8 @@ Step 4: Update Dependencies (if needed)
     1. If you install new libraries, update requirements.txt:
         pip freeze > requirements.txt
 
-
+for playwright:
+write in the cmd: playwright install
 
 
 
