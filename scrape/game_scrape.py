@@ -11,7 +11,7 @@ DATA_DIR = "data" # Data directory
 STANDINGS_DIR = os.path.join(DATA_DIR, "standings")  # Standings data
 SCORES_DIR = os.path.join(DATA_DIR, "scores")  # Scores data
 
-standings_files = os.listdir(STANDINGS_DIR)
+
 
 
 # Main function
@@ -19,7 +19,7 @@ async def scrape_game(standings_file):
     print(f"Reading file: {standings_file}")
     with open(standings_file, 'r') as f:
         html = f.read()
-    soup = BeautifulSoup(html)
+    soup = BeautifulSoup(html, 'html.parser')
     links = soup.find_all("a")
     hrefs = [l.get("href") for l in links] # Extract the href attribute of the links
     box_scores = [l for l in hrefs if l and "boxscore" in l and ".html" in l] # Filter links containing "boxscores"
@@ -32,12 +32,15 @@ async def scrape_game(standings_file):
         html = await web_scrape.get_html(url, "#content")
         if not html:
             continue
-        with open(save_path, "w+") as f:
+        with open(save_path, "w+", encoding="utf-8") as f:
             f.write(html)
 
 
 
+
 async def main():
+    standings_files = os.listdir(STANDINGS_DIR)
+    standings_files = [s for s in standings_files if ".html" in s]
     for f in standings_files:
         filepath = os.path.join(STANDINGS_DIR, f)
         await scrape_game(filepath)
