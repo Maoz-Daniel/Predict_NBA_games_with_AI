@@ -5,7 +5,7 @@ from playwright.async_api import async_playwright, TimeoutError as PlaywrightTim
 import time
 
 # Constants
-SEASONS = list(range(2018, 2025))  # 2018-2024 seasons
+SEASONS = list(range(2021, 2025))  # 2018-2024 seasons
 DATA_DIR = "data" # Data directory
 STANDINGS_DIR = os.path.join(DATA_DIR, "standings")  # Standings data
 SCORES_DIR = os.path.join(DATA_DIR, "scores")  # Scores data
@@ -19,7 +19,7 @@ async def get_html(url, selector, sleep=5, retries=3):
         try:
             async with async_playwright() as p: # Create a Playwright instance
                 print("Launching browser...")
-                browser = await p.chromium.launch()  # Launch a browser
+                browser = await p.firefox.launch()  # Launch a browser
                 page = await browser.new_page()  # Open a new page
                 await page.goto(url)  # Navigate to the URL
                 print(f"Page title: {await page.title()}")  # Print the title of the page

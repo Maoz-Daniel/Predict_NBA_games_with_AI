@@ -6,7 +6,7 @@ import time
 import web_scrape
 
 # Constants
-SEASONS = list(range(2018, 2025))  # 2018-2024 seasons
+SEASONS = list(range(2021, 2025))  # 2018-2024 seasons
 DATA_DIR = "data" # Data directory
 STANDINGS_DIR = os.path.join(DATA_DIR, "standings")  # Standings data
 SCORES_DIR = os.path.join(DATA_DIR, "scores")  # Scores data
