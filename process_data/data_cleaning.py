@@ -1,99 +1,127 @@
 import pandas as pd
 
-#data cleaning
-df = pd.read_csv("data\\games.csv", index_col=None)
+def clean_data():
+    #data cleaning
+    df = pd.read_csv("data\\combined_uncleaned_dataset.csv", index_col=None)
 
-df = df.sort_values(by='date')
-df = df.reset_index(drop=True)
+    df = df.sort_values(by='date')
+    df = df.reset_index(drop=True)
 
-del df['mp.1']
-del df['mp_opp.1']
-del df['index_opp']
+    del df['mp.1']
+    del df['mp_opp.1']
+    del df['index_opp']
 
-def add_target(team): #the target is the next game's result
-    team["target"] = team["won"].shift(-1) #shifts the target column up by 1
-    return team
+    def add_target(team): #the target is the next game's result
+        team["target"] = team["won"].shift(-1) #shifts the target column up by 1
+        return team
 
-df=df.groupby("Team",group_keys=False).apply(add_target) #group by team and apply the add_target function
-
-
-
-df["target"][pd.isnull(df["target"])]=2 #if the target is null, it means that the team has no more games to play, so we set the target to 2
-
-df["target"]=df["target"].astype(int,errors="ignore") #convert the target to int
-
-nulls=pd.isnull(df) #check for nulls
-nulls=nulls.sum()
-
-def delete_unrellevant_columns(df): #delete columns that are not relevant for the prediction
-    del df['gmsc']
-    del df['+/-']
-    del df['mp_max']
-    del df['mp_max.1']
-    del df['gmsc_opp']
-    del df['+/-_opp']
-    del df['mp_max_opp']
-    del df['mp_max_opp.1']
-    del df['+/-_max']
-    del df['+/-_max_opp']
-    print("-----------------------------------------------remove the unrellevant culloms succesfully-----------------------------------------------")
-
-    return df
+    df=df.groupby("Team",group_keys=False).apply(add_target) #group by team and apply the add_target function
 
 
-def fill_missing_values(df):
-    """
-    Fills missing values in the DataFrame using the average value for the field,
-    calculated based on the team and season of the current row.
-    Prints a summary of the changes made and the values filled.
-    """
-    missing_summary = {}  # Dictionary to track missing values filled per column
-    filled_values = {}    # Dictionary to store the filled values for each column
 
-    for index, row in df.iterrows():
-        for column in df.columns:
-            if pd.isna(row[column]):  # Check if the value is missing
-                # Extract team and season for the current row
-                team = row['Team']
-                season = row['season']
+    df["target"][pd.isnull(df["target"])]=2 #if the target is null, it means that the team has no more games to play, so we set the target to 2
 
-                # Filter DataFrame to get relevant rows for the same team and season
-                relevant_rows = df[(df['Team'] == team) & (df['season'] == season)]
+    df["target"]=df["target"].astype(int,errors="ignore") #convert the target to int
 
-                # Calculate the average value for the column (excluding NaN values)
-                average_value = relevant_rows[column].mean()
+    nulls=pd.isnull(df) #check for nulls
+    nulls=nulls.sum()
 
-                # Fill the missing value with the calculated average
-                df.at[index, column] = average_value
+    def delete_unrellevant_columns(df): #delete columns that are not relevant for the prediction
+        del df['gmsc']
+        del df['+/-']
+        del df['mp_max']
+        del df['mp_max.1']
+        del df['gmsc_opp']
+        del df['+/-_opp']
+        del df['mp_max_opp']
+        del df['mp_max_opp.1']
+        del df['+/-_max']
+        del df['+/-_max_opp']
+        print("-----------------------------------------------remove the unrellevant culloms succesfully-----------------------------------------------")
 
-                # Update summary
-                if column not in missing_summary:
-                    missing_summary[column] = 0
-                    filled_values[column] = []
-                missing_summary[column] += 1
-                filled_values[column].append(average_value)
+        return df
 
-    # Print summary
-    print("\n=== Summary of Missing Value Completion ===")
-    total_filled = 0
-    for column, count in missing_summary.items():
-        print(f"Column '{column}': {count} values filled.")
-        print(f"Values filled: {filled_values[column]}")
-        total_filled += count
-    print(f"Total values filled: {total_filled}")
 
-    return df
+    def fill_missing_values(df):
+        """
+        Fills missing values in the DataFrame using the average value for the field,
+        calculated based on the team and season of the current row.
+        Prints a summary of the changes made and the values filled.
+        """
+        missing_summary = {}  # Dictionary to track missing values filled per column
+        filled_values = {}    # Dictionary to store the filled values for each column
 
-df=delete_unrellevant_columns(df)
+        for index, row in df.iterrows():
+            for column in df.columns:
+                if pd.isna(row[column]):  # Check if the value is missing
+                    # Extract team and season for the current row
+                    team = row['Team']
+                    season = row['season']
 
-# print(nulls[nulls>0]) #print the columns with nulls
-df=fill_missing_values(df)
-nulls=pd.isnull(df) #check for nulls
-nulls=nulls.sum()
+                    # Filter DataFrame to get relevant rows for the same team and season
+                    relevant_rows = df[(df['Team'] == team) & (df['season'] == season)]
 
-#print(nulls[nulls>0]) #print the columns with nulls
+                    # Calculate the average value for the column (excluding NaN values)
+                    average_value = relevant_rows[column].mean()
 
-df_clean = df.copy()
-print(df_clean)
+                    # Fill the missing value with the calculated average
+                    df.at[index, column] = average_value
 
-df_clean.to_csv("data\\games_clean.csv") #save the cleaned data to a new csv file
+                    # Update summary
+                    if column not in missing_summary:
+                        missing_summary[column] = 0
+                        filled_values[column] = []
+                    missing_summary[column] += 1
+                    filled_values[column].append(average_value)
+
+        # Print summary
+        print("\n=== Summary of Missing Value Completion ===")
+        total_filled = 0
+        for column, count in missing_summary.items():
+            print(f"Column '{column}': {count} values filled.")
+            print(f"Values filled: {filled_values[column]}")
+            total_filled += count
+        print(f"Total values filled: {total_filled}")
+
+        return df
+
+    df=delete_unrellevant_columns(df)
+
+    # print(nulls[nulls>0]) #print the columns with nulls
+    df=fill_missing_values(df)
+    nulls=pd.isnull(df) #check for nulls
+    nulls=nulls.sum()
+
+    #print(nulls[nulls>0]) #print the columns with nulls
+
+    df_clean = df.copy()
+    print(df_clean)
+
+    df_clean.to_csv("data\\combined_uncleaned_dataset_clean.csv") #save the cleaned data to a new csv file
+
+
+def print_coulmns_with_missing_values(df):
+    print("The columne that has nan values inside of them are:")
+    print(df.columns[df.isnull().any()].tolist())
+
+def delete_column(dataset, column_name):
+    dataset = dataset.drop(columns=[column_name], errors='ignore')
+    dataset.to_csv("data\combined_uncleaned_dataset_clean_withnogmsc_max_no_opp.csv", index=False)
+    return dataset
+
+
+def main():
+    # combined_uncleaned_dataset_clean = pd.read_csv("data\combined_uncleaned_dataset_clean.csv")
+    # delete_column(combined_uncleaned_dataset_clean, "gmsc_max")
+    combined_uncleaned_dataset_clean_withnogmsc_max_no_opp = pd.read_csv("data\combined_uncleaned_dataset_clean_withnogmsc_max_no_opp.csv")
+    # print_coulmns_with_missing_values(combined_uncleaned_dataset_clean_withnogmsc_max)
+    # print(combined_uncleaned_dataset_clean_withnogmsc_max)
+    # delete_column(combined_uncleaned_dataset_clean_withnogmsc_max, "gmsc_max_opp")
+    print_coulmns_with_missing_values(combined_uncleaned_dataset_clean_withnogmsc_max_no_opp)
+
+
+
+    
+if __name__ == "__main__":
+    main()
+
