@@ -1,8 +1,13 @@
+Yossi the king kong in video number one minute 01:02 shows how to create virtual environment
+He asked gpt for help and he share his wisdom with us, showing how the AI led us to the greates
+years of our lives, no need to explain.
+Python is developing so much, while we are talking and sleeping, it is evolving exponentially.
+
+
 Step 1: Activate a Virtual Environment
     1. Activate the virtual environment:
         .\.venv\Scripts\activate
         
-
 Step 2: Before Push
     1. Update requirements.txt
         pip freeze > requirements.txt
@@ -13,9 +18,4 @@ Step 3: Install Dependencies
 
 for playwright:
 write in the cmd: playwright install
-
-
-
-
-
 
