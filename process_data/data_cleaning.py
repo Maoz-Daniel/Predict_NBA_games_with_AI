@@ -116,18 +116,16 @@ def add_target_2020(df):
     return df
 
     
-# def main():
-
 def main():
-    input_path = "data\games.csv"
-    output_path = "data\games_clean.csv"
+    input_path = "data\\games.csv"
+    output_path = "data\\games_clean.csv"
 
     #---------------- data from 2020-2021 to 2023-2024 seasons----------------
 
     df = load_and_clean_data(input_path)
     df = add_target_column(df)
     columns_to_delete = ['gmsc', '+/-', 'mp_max', 'mp_max.1', 'gmsc_opp', '+/-_opp', 
-                                'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp','gmsc_max_opp', 'gmsc_max']
+                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp','gmsc_max_opp', 'gmsc_max']
     df = delete_irrelevant_columns(df, columns_to_delete)
     df = fill_missing_values(df)
     check_for_nan_rows(df)
@@ -136,12 +134,12 @@ def main():
 
     save_clean_data(df, output_path)
 
-        #---------------- data from 2017-2018 to 2019-2020 seasons----------------
+    #---------------- data from 2017-2018 to 2019-2020 seasons----------------
 
-    input_path_old= "data\games_2015-16--2021-22.csv"
-    output_path_old= "data\games_2015-16--2021-22_clean.csv"
+    input_path_old= "data\\games_2015-16--2021-22.csv"
+    output_path_old= "data\\games_2015-16--2021-22_clean.csv"
 
-    df_old_seasons= pd.read_csv("data\games_2015-16--2021-22.csv")
+    df_old_seasons= pd.read_csv("data\\games_2015-16--2021-22.csv")
     years = [2018, 2019, 2020]
     df_old_seasons = df_old_seasons[df_old_seasons['season'].isin(years)]
 
@@ -162,9 +160,9 @@ def main():
     # delete irrelevant columns
     #add two culloms, gmsc and gmsc_opp with Nan values
     columns_to_delete = ['Unnamed: 0','+/-', 'mp_max', 'mp_max.1','+/-_opp', 
-                            'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp']
+                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp']
     df_old_seasons = delete_irrelevant_columns(df_old_seasons, columns_to_delete)
-    
+   
     df_old_seasons = fill_missing_values(df_old_seasons)
     check_for_nan_rows(df_old_seasons)
     cheack_diffrent_columns(df, df_old_seasons)
@@ -173,31 +171,22 @@ def main():
 
     #combine the two dataframes
     combined_df = combine_data(df, df_old_seasons)
-    print("This is the first combined_df" , combined_df)
-    save_clean_data(combined_df, "data\games_all_clean.csv")
-    print("This is the second combined_df" , combined_df)
+    save_clean_data(combined_df, "data\\games_all_clean.csv")
 
     check_for_nan_rows(combined_df)
-    print("This is the third combined_df" , combined_df)
-
+    print("now the data is clean and ready for analysis")
+    print(combined_df)
+    
+    delete_irrelevant_columns(combined_df, ['target'])
+    print("------------------------------------------------")
+    print(combined_df.columns)
     add_target_column(combined_df)
-    print("This is the fourth combined_df" , combined_df)
-    cooutn = 0
-    for game_target in combined_df['target']:
-        if game_target == 2:
-            cooutn += 1
-    print(cooutn)
+    print("------------------------------------------------")
+    print(combined_df.columns)
+
+    print("Data cleaning completed.")
+    print("number of target 2:")
+    print(combined_df[combined_df['target']==2].shape[0])
 
 if __name__ == "__main__":
     main()
-
-
-    
-
-
-
-
-    
-
-# if __name__ == "_main_":
-#     main()
