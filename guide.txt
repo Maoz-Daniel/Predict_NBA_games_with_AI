@@ -1,6 +1,7 @@
 Step 1: Activate a Virtual Environment
     1. Activate the virtual environment:
         .\.venv\Scripts\activate
+        
 
 Step 2: Before Push
     1. Update requirements.txt

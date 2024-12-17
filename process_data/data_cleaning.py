@@ -1,127 +1,204 @@
 import pandas as pd
 
-def clean_data():
-    #data cleaning
-    df = pd.read_csv("data\\combined_uncleaned_dataset.csv", index_col=None)
+def load_and_clean_data(file_path):
+    """
+    Load the dataset and perform initial cleaning (sorting, resetting index, removing unnecessary columns).
+    """
+    df = pd.read_csv(file_path, index_col=None)
+    df = df.sort_values(by='date').reset_index(drop=True)
 
-    df = df.sort_values(by='date')
-    df = df.reset_index(drop=True)
+    # Delete unnecessary columns
+    columns_to_delete = ['mp.1', 'mp_opp.1', 'index_opp']
+    df.drop(columns=columns_to_delete, inplace=True)
 
-    del df['mp.1']
-    del df['mp_opp.1']
-    del df['index_opp']
+    return df
 
-    def add_target(team): #the target is the next game's result
-        team["target"] = team["won"].shift(-1) #shifts the target column up by 1
+def add_target_column(df):
+    """
+    Add the 'target' column to indicate the next game's result.
+    """
+    def add_target(team):
+        team["target"] = team["won"].shift(-1)
         return team
 
-    df=df.groupby("Team",group_keys=False).apply(add_target) #group by team and apply the add_target function
+    df = df.groupby("Team", group_keys=False).apply(add_target)
 
+    # Set target to 2 for teams with no more games to play
+    df["target"].fillna(2, inplace=True)
 
+    # Convert target to integer
+    df["target"] = df["target"].astype(int, errors="ignore")
 
-    df["target"][pd.isnull(df["target"])]=2 #if the target is null, it means that the team has no more games to play, so we set the target to 2
+    return df
 
-    df["target"]=df["target"].astype(int,errors="ignore") #convert the target to int
+def delete_irrelevant_columns(df, columns_to_delete):
+    df.drop(columns=columns_to_delete, inplace=True)
+    print("Successfully removed irrelevant columns.")
 
-    nulls=pd.isnull(df) #check for nulls
-    nulls=nulls.sum()
+    return df
 
-    def delete_unrellevant_columns(df): #delete columns that are not relevant for the prediction
-        del df['gmsc']
-        del df['+/-']
-        del df['mp_max']
-        del df['mp_max.1']
-        del df['gmsc_opp']
-        del df['+/-_opp']
-        del df['mp_max_opp']
-        del df['mp_max_opp.1']
-        del df['+/-_max']
-        del df['+/-_max_opp']
-        print("-----------------------------------------------remove the unrellevant culloms succesfully-----------------------------------------------")
+def fill_missing_values(df):
+    """
+    Fill missing values in the DataFrame using the average value for the field,
+    calculated based on the team and season of the current row.
+    """
+    missing_summary = {}
 
-        return df
+    for index, row in df.iterrows():
+        for column in df.columns:
+            if pd.isna(row[column]):
+                team = row['Team']
+                season = row['season']
+                
+                relevant_rows = df[(df['Team'] == team) & (df['season'] == season)]
+                average_value = relevant_rows[column].mean()
 
+                df.at[index, column] = average_value
 
-    def fill_missing_values(df):
-        """
-        Fills missing values in the DataFrame using the average value for the field,
-        calculated based on the team and season of the current row.
-        Prints a summary of the changes made and the values filled.
-        """
-        missing_summary = {}  # Dictionary to track missing values filled per column
-        filled_values = {}    # Dictionary to store the filled values for each column
+                if column not in missing_summary:
+                    missing_summary[column] = 0
+                missing_summary[column] += 1
 
-        for index, row in df.iterrows():
-            for column in df.columns:
-                if pd.isna(row[column]):  # Check if the value is missing
-                    # Extract team and season for the current row
-                    team = row['Team']
-                    season = row['season']
+    print("\n=== Summary of Missing Value Completion ===")
+    for column, count in missing_summary.items():
+        print(f"Column '{column}': {count} values filled.")
 
-                    # Filter DataFrame to get relevant rows for the same team and season
-                    relevant_rows = df[(df['Team'] == team) & (df['season'] == season)]
+    return df
 
-                    # Calculate the average value for the column (excluding NaN values)
-                    average_value = relevant_rows[column].mean()
+def save_clean_data(df, output_path):
+    """
+    Save the cleaned dataset to a CSV file.
+    """
+    df.to_csv(output_path, index=False)
+    print(f"Cleaned data saved to {output_path}")
 
-                    # Fill the missing value with the calculated average
-                    df.at[index, column] = average_value
+def check_for_nan_rows(df):
+    """
+    Check for rows with missing values and print their index and column details.
+    """
+    print("\nRows with missing values:")
+    for index, row in df.iterrows():
+        if row.isnull().any():
+            nan_columns = row[row.isnull()].index.tolist()
+            nan_values = row[row.isnull()].values.tolist()
+            print(f"Row {index}: Columns with NaN - {nan_columns}, Values - {nan_values}")
 
-                    # Update summary
-                    if column not in missing_summary:
-                        missing_summary[column] = 0
-                        filled_values[column] = []
-                    missing_summary[column] += 1
-                    filled_values[column].append(average_value)
+def cheack_diffrent_columns(df1, df2):
+    """
+    print all the colums in df1 and not in df2, and all the columns in df2 and not in df1
+    """
+    columns1 = df1.columns
+    columns2 = df2.columns
 
-        # Print summary
-        print("\n=== Summary of Missing Value Completion ===")
-        total_filled = 0
-        for column, count in missing_summary.items():
-            print(f"Column '{column}': {count} values filled.")
-            print(f"Values filled: {filled_values[column]}")
-            total_filled += count
-        print(f"Total values filled: {total_filled}")
+    diff1 = set(columns1) - set(columns2)
+    diff2 = set(columns2) - set(columns1)
 
-        return df
+    print(f"Columns in df1 and not in df2: {diff1}")
+    print(f"Columns in df2 and not in df1: {diff2}")
 
-    df=delete_unrellevant_columns(df)
+def combine_data(df1, df2):
+    """
+    Combine two DataFrames by concatenating them.
+    """
+    combined_df = pd.concat([df1, df2], ignore_index=True)
+    #sort the data by date and reset the index
+    combined_df = combined_df.sort_values(by='date').reset_index(drop=True)
+    return combined_df
 
-    # print(nulls[nulls>0]) #print the columns with nulls
-    df=fill_missing_values(df)
-    nulls=pd.isnull(df) #check for nulls
-    nulls=nulls.sum()
+def add_target_2020(df):
+    """
+    Due to the Corona virus, the games haven't been played for 4 months,
+      so the data mistakenly classifies the target of all teams as 2, 
+      so we will change it manually.
+    """
+    
 
-    #print(nulls[nulls>0]) #print the columns with nulls
+    return df
 
-    df_clean = df.copy()
-    print(df_clean)
-
-    df_clean.to_csv("data\\combined_uncleaned_dataset_clean.csv") #save the cleaned data to a new csv file
-
-
-def print_coulmns_with_missing_values(df):
-    print("The columne that has nan values inside of them are:")
-    print(df.columns[df.isnull().any()].tolist())
-
-def delete_column(dataset, column_name):
-    dataset = dataset.drop(columns=[column_name], errors='ignore')
-    dataset.to_csv("data\combined_uncleaned_dataset_clean_withnogmsc_max_no_opp.csv", index=False)
-    return dataset
-
-
+    
 def main():
-    # combined_uncleaned_dataset_clean = pd.read_csv("data\combined_uncleaned_dataset_clean.csv")
-    # delete_column(combined_uncleaned_dataset_clean, "gmsc_max")
-    combined_uncleaned_dataset_clean_withnogmsc_max_no_opp = pd.read_csv("data\combined_uncleaned_dataset_clean_withnogmsc_max_no_opp.csv")
-    # print_coulmns_with_missing_values(combined_uncleaned_dataset_clean_withnogmsc_max)
-    # print(combined_uncleaned_dataset_clean_withnogmsc_max)
-    # delete_column(combined_uncleaned_dataset_clean_withnogmsc_max, "gmsc_max_opp")
-    print_coulmns_with_missing_values(combined_uncleaned_dataset_clean_withnogmsc_max_no_opp)
+    input_path = "data\games.csv"
+    output_path = "data\games_clean.csv"
+
+    #---------------- data from 2020-2021 to 2023-2024 seasons----------------
+
+    df = load_and_clean_data(input_path)
+    df = add_target_column(df)
+    columns_to_delete = ['gmsc', '+/-', 'mp_max', 'mp_max.1', 'gmsc_opp', '+/-_opp', 
+                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp','gmsc_max_opp', 'gmsc_max']
+    df = delete_irrelevant_columns(df, columns_to_delete)
+    df = fill_missing_values(df)
+    check_for_nan_rows(df)
+
+
+
+    save_clean_data(df, output_path)
+
+    #---------------- data from 2017-2018 to 2019-2020 seasons----------------
+
+    input_path_old= "data\games_2015-16--2021-22.csv"
+    output_path_old= "data\games_2015-16--2021-22_clean.csv"
+
+    df_old_seasons= pd.read_csv("data\games_2015-16--2021-22.csv")
+    years = [2018, 2019, 2020]
+    df_old_seasons = df_old_seasons[df_old_seasons['season'].isin(years)]
+
+    #update the current file
+    save_clean_data(df_old_seasons, input_path_old)
+
+    df_old_seasons= load_and_clean_data(input_path_old)
+
+    # change team column name to Team, from total to Total, from total_opp to Total_opp, from team_opp to Team_opp
+    df_old_seasons.rename(columns={'team':'Team'}, inplace=True)
+    df_old_seasons.rename(columns={'total':'Total'}, inplace=True)
+    df_old_seasons.rename(columns={'total_opp':'Total_opp'}, inplace=True)
+    df_old_seasons.rename(columns={'team_opp':'Team_opp'}, inplace=True)
+
+    df_old_seasons = add_target_column(df_old_seasons)
+
+
+    # delete irrelevant columns
+    #add two culloms, gmsc and gmsc_opp with Nan values
+    columns_to_delete = ['Unnamed: 0','+/-', 'mp_max', 'mp_max.1','+/-_opp', 
+                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp']
+    df_old_seasons = delete_irrelevant_columns(df_old_seasons, columns_to_delete)
+   
+    df_old_seasons = fill_missing_values(df_old_seasons)
+    check_for_nan_rows(df_old_seasons)
+    cheack_diffrent_columns(df, df_old_seasons)
+
+    save_clean_data(df_old_seasons, output_path_old)
+
+    #combine the two dataframes
+    combined_df = combine_data(df, df_old_seasons)
+    save_clean_data(combined_df, "data\games_all_clean.csv")
+
+    check_for_nan_rows(combined_df)
+    print("now the data is clean and ready for analysis")
+    print(combined_df)
+    
+    delete_irrelevant_columns(combined_df, ['target'])
+    print("------------------------------------------------")
+    print(combined_df.columns)
+    add_target_column(combined_df)
+    print("------------------------------------------------")
+    print(combined_df.columns)
+
+    print("Data cleaning completed.")
+    print("number of target 2:")
+    print(combined_df[combined_df['target']==2].shape[0])
+   
+    
+
+
+   
+
+  
+
 
 
 
     
-if __name__ == "__main__":
-    main()
 
+if _name_ == "_main_":
+    main()
