@@ -53,6 +53,13 @@ def find_team_averages(team):
     rolling = numeric_team.rolling(10).mean()
     return rolling
 
+def shift_col(team,col_name):
+    next_col=team[col_name].shift(-1) # shift the column by one
+    return next_col
+
+def add_col(df, col_name):
+    return df.groupby("Team",group_keys=False).apply(lambda x: shift_col(x,col_name)) 
+
     
 def main():
     rr= RidgeClassifier(alpha=1.0)
@@ -71,9 +78,38 @@ def main():
 
     df_rolling = df[list(selected_coulmns) + ["won", "Team", "season"]]  # Keep relevant columns
     df_rolling = df_rolling.groupby(["Team", "season"], group_keys=False).apply(find_team_averages)  # Apply rolling mean
-    print(df_rolling)
-    #39:34
+    rolling_cols=[f"{col}_10" for col in df_rolling.columns ] # rename the columns
+    df_rolling.columns = rolling_cols # rename the columns
+    df = pd.concat([df, df_rolling], axis=1) # merge the dataframes
+    df=df.dropna() # drop the rows with missing values
+    df["home_next"] = add_col(df, "home") # add the home team for the next game
+    df["Team_opp_next"] = add_col(df, "Team_opp") # add the away team for the next game
+    df["date_next"] = add_col(df, "date") # add the date for the next game
+    df=df.copy() 
+   
 
+    full=df.merge(df[rolling_cols+["Team_opp_next","date_next", "Team"]],
+                   left_on=["Team","date_next"],
+                     right_on=["Team_opp_next","date_next"]
+    )
+    removed_columns= list(full.columns[full.dtypes == "object"]) + removed_columns # remove the object columns
+    selected_coulmns = full.columns[~full.columns.isin(removed_columns)] # get the selected columns
+   
+    #sfs.fit(full[selected_coulmns], full["target"]) # fit the model
+    #predictors = list(selected_coulmns[sfs.get_support()]) # get the selected features
+    predictors=['3p%', 'trb', 'stl', 'usg%', 'pf_max', 
+                'usg%_opp', 'tov_max_opp', 'ftr_10_x', 'usg%_10_x', 'ortg_10_x', 
+                'drtg_10_x', '3p_opp_10_x', 'ft%_opp_10_x', 'usg%_opp_10_x', 'ortg_opp_10_x',
+                  'drtg_opp_10_x', 'fga_max_opp_10_x', '3par_max_opp_10_x', 'home_next', 'orb_10_y', 
+                  'usg%_10_y', 'drtg_10_y', '3p%_opp_10_y', 'usg%_opp_10_y', 'ortg_opp_10_y', 
+                  'ft_max_opp_10_y', 'trb_max_opp_10_y', 'blk_max_opp_10_y', 'blk%_max_opp_10_y', 'drtg_max_opp_10_y']
+    predictions=backtest(full, rr, predictors) # backtest the model
+    accuracy_score(predictions["actual"], predictions["predicted"]) # get the accuracy score
+    print(accuracy_score(predictions["actual"], predictions["predicted"]))
+    
+    # xg boost or random forest
+
+    #print(removed_columns)
 
 
 
