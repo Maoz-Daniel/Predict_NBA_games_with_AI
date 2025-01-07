@@ -4,12 +4,12 @@ from sklearn.linear_model import RidgeClassifier
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score
-TOP_30 = ['mp', 'ft', 'fta', 'ft%', 'orb', 'drb', 'trb', 
-          'drb%', 'ast%', 'tov%', 'usg%', 'orb_max', 'drb%_max',
-            'blk%_max', 'usg%_max', 'mp_opp', 'fg%_opp', 'fta_opp', 
-            'orb_opp', 'orb%_opp', 'stl%_opp', 'usg%_opp', 'fga_max_opp',
-              '3p_max_opp', 'ft_max_opp', 'ft%_max_opp', 'orb_max_opp', 
-              'drb_max_opp', '3par_max_opp', 'drb%_max_opp']
+TOP_30 = ['ortg', 'drtg_opp', 'drtg_max_opp', 'ts%', 'pts', 'efg%', 'fg%', 
+          'trb%', 'fg', 'drb', '3p%', 'ast', 'trb',
+            '3p', 'pts_max', 'drb_max', 'ast_max', 'fg_max', 
+            '3p_max', 'blk', 'trb_max', 'blk%', 'ortg_max',
+              'ts%_max', 'orb%', 'drb%', 'blk_max', 
+              'stl%', 'ft', 'efg%_max']
 
 def save_data(df, output_path):
     """
