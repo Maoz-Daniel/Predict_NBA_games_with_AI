@@ -117,8 +117,8 @@ def add_target_2020(df):
 
     
 def main():
-    input_path = "data\games.csv"
-    output_path = "data\games_clean.csv"
+    input_path = "data\\games.csv"
+    output_path = "data\\games_clean.csv"
 
     #---------------- data from 2020-2021 to 2023-2024 seasons----------------
 
@@ -136,10 +136,10 @@ def main():
 
     #---------------- data from 2017-2018 to 2019-2020 seasons----------------
 
-    input_path_old= "data\games_2015-16--2021-22.csv"
-    output_path_old= "data\games_2015-16--2021-22_clean.csv"
+    input_path_old= "data\\games_2015-16--2021-22.csv"
+    output_path_old= "data\\games_2015-16--2021-22_clean.csv"
 
-    df_old_seasons= pd.read_csv("data\games_2015-16--2021-22.csv")
+    df_old_seasons= pd.read_csv("data\\games_2015-16--2021-22.csv")
     years = [2018, 2019, 2020]
     df_old_seasons = df_old_seasons[df_old_seasons['season'].isin(years)]
 
@@ -171,7 +171,7 @@ def main():
 
     #combine the two dataframes
     combined_df = combine_data(df, df_old_seasons)
-    save_clean_data(combined_df, "data\games_all_clean.csv")
+    save_clean_data(combined_df, "data\\games_all_clean.csv")
 
     check_for_nan_rows(combined_df)
     print("now the data is clean and ready for analysis")
@@ -187,18 +187,6 @@ def main():
     print("Data cleaning completed.")
     print("number of target 2:")
     print(combined_df[combined_df['target']==2].shape[0])
-   
-    
 
-
-   
-
-  
-
-
-
-
-    
-
-if __name__ == "_main_":
+if __name__ == "__main__":
     main()
