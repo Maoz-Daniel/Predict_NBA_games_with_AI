@@ -10,7 +10,7 @@ Step 1: Activate a Virtual Environment
         
 Step 2: Before Push
     1. Update requirements.txt
-        pip freeze > requirements.txt
+        pip freeze > requirements.txt 
 
 Step 3: Install Dependencies
     1. Install required libraries using requirements.txt:
