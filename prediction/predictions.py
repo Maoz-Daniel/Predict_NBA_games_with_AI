@@ -186,7 +186,6 @@ def predict(df, model, date, games, window=10, pca=None, scaler=None):
     
 
 def predict_games(games, date):
-    upd
     file_path = os.path.join(DATA_DIR, "games_all_clean.csv")
     df = pd.read_csv(file_path, index_col=None)
 
