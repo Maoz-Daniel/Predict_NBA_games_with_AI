@@ -388,7 +388,7 @@ def safe_val(val, default=0):
 file_path = "data\\first_half_2024.csv"
 model, scaler, df_preprocessed = train_and_evaluate(file_path)
 
-home_team = "DEN"
+home_team = "DAL"
 opp_team = "PHO"
 save_data(df_preprocessed,"data\\temp.csv")
 team = teams_to_num[home_team]
@@ -453,7 +453,7 @@ pred_label, pred_prob = predict_upcoming_game(
     scaler=scaler,
     df_preprocessed=df_preprocessed,
     date="2024-03-05",
-    home=1,           # Suppose the "team" is playing at home
+    home=0,           # Suppose the "team" is playing at home
     team= home_team,    # Must match the original categories
     team_opp= opp_team,  # Must match the original categories
     season=2024,

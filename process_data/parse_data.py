@@ -92,8 +92,12 @@ async def main():
         except Exception as e:
             # Print the date of the game that caused the error
             print(f"Cnnot parse {box_score} due to error: {e} with date {os.path.basename(box_score)[:8]}")
-    games_df = pd.concat(games, ignore_index=True)
-    games_df.to_csv("data/games.csv", index=False)
+    if(games):
+        games_df = pd.concat(games, ignore_index=True)
+        games_df.to_csv("data/newGames.csv", index=False)
+        #erase from data/scores
+        for file in box_scores:
+            os.remove(file)
     
 
 

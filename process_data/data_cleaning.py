@@ -1,15 +1,11 @@
 import pandas as pd
-
+import os
 def load_and_clean_data(file_path):
     """
     Load the dataset and perform initial cleaning (sorting, resetting index, removing unnecessary columns).
     """
-    df = pd.read_csv(file_path, index_col=None)
+    df = pd.read_csv(file_path)
     df = df.sort_values(by='date').reset_index(drop=True)
-
-    # Delete unnecessary columns
-    columns_to_delete = ['mp.1', 'mp_opp.1', 'index_opp']
-    df.drop(columns=columns_to_delete, inplace=True)
 
     return df
 
@@ -117,25 +113,28 @@ def add_target_2020(df):
 
     
 def main():
-    input_path = "data\\games.csv"
-    output_path = "data\\games_clean.csv"
-
-    #---------------- data from 2020-2021 to 2023-2024 seasons----------------
+    input_path = "data\\newGames.csv"
+    output_path = "data\\newGames_clean.csv"
 
     df = load_and_clean_data(input_path)
     df = add_target_column(df)
     columns_to_delete = ['gmsc', '+/-', 'mp_max', 'mp_max.1', 'gmsc_opp', '+/-_opp', 
-                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp','gmsc_max_opp', 'gmsc_max']
+                         'mp_max_opp', 'mp_max_opp.1', '+/-_max', '+/-_max_opp' ,'mp.1', 'mp_opp.1','index_opp','gmsc_max','gmsc_max_opp']
     df = delete_irrelevant_columns(df, columns_to_delete)
     df = fill_missing_values(df)
     check_for_nan_rows(df)
 
 
 
+
+
     save_clean_data(df, output_path)
 
-    #---------------- data from 2017-2018 to 2019-2020 seasons----------------
 
+
+
+    #---------------- data from 2017-2018 to 2019-2020 seasons----------------
+"""
     input_path_old= "data\\games_2015-16--2021-22.csv"
     output_path_old= "data\\games_2015-16--2021-22_clean.csv"
 
@@ -186,7 +185,7 @@ def main():
 
     print("Data cleaning completed.")
     print("number of target 2:")
-    print(combined_df[combined_df['target']==2].shape[0])
+    """
 
 if __name__ == "__main__":
     main()

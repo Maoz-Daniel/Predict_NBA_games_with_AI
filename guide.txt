@@ -19,3 +19,6 @@ Step 3: Install Dependencies
 for playwright:
 write in the cmd: playwright install
 
+Run Frontebd: npm start (in frontend folder)
+
+Run Backend: python app.py (in backend folder)
