@@ -109,7 +109,7 @@ def fix_target_column(date):
     return 
 # Main function
 async def main():
-    date = "2022-12-06"
+    date = "2025-01-24"
     await scrape_games_for_date(date)
     print("Scraping completed.")
     await parse_data.main()
